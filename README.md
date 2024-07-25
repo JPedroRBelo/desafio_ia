@@ -58,7 +58,12 @@ onde `</path/to/orthomosaic.tif>` deve indicar o caminho para a imagem e `</path
 
 ## Geração de Dataset
 
+Para gerar o dataset com máscaras de segmentação são utilizadas as subimagens geradas na etapa anterior. O método adotado para gerar as máscaras foi o ExG (Excess Green Index), que analisa os canais Vermelho (R), Verde (G) e Azul (B) e torna evidente o canal verde. Isto se dá através da formula `2 * g − r − b`. Logo após esta operação, é utilizado um limiar (definido como 128) visando binarizar a máscara resultante. Para gerar o dataset, basta executar o seguinte comando:
 
+```bash
+   python binarize_images.py --input </path/to/images/dir> --output </path/to/segmented/dir/>
+```
+onde `</path/to/images/dir>` deve indicar o caminho para o diretório das subimagens e `</path/to/segmented/dir/>` o diretório onde as máscaras serão salvas.
 
 ## Treinamento do Modelo
 
