@@ -5,7 +5,7 @@ from PIL import Image
 from tqdm import tqdm
 from config.config import SUBTILES_SIZE
 
-def subdivide_tiff_image(input_path, output_dir, tile_size):
+def subdivide_tiff_image(input_path: str, output_dir: str, tile_size: tuple[int, int]) -> None:
     """
     Subdivide uma imagem TIFF em sub-imagens menores e as salva como arquivos PNG.
 
@@ -22,7 +22,7 @@ def subdivide_tiff_image(input_path, output_dir, tile_size):
     img = Image.open(input_path)
     img_width, img_height = img.size
     tile_width, tile_height = tile_size
-
+    
     #Auxilia na denominação de novos subtiles
     count = 0
 
@@ -37,14 +37,14 @@ def subdivide_tiff_image(input_path, output_dir, tile_size):
                 tile = img.crop(box)
 
                 #Salva subtile em disco
-                tile_filename = os.path.join(output_dir, f"tile_{count}.png")
+                tile_filename = os.path.join(output_dir, f"image_{count}.png")
                 tile.save(tile_filename)
                 count += 1
                 pbar.update(1)
 
     logging.info(f"Subimagens salvas em: {output_dir}")
 
-def main(input_path, output_dir):
+def main(input_path: str, output_dir: str) -> None:
     """
     Código principal para gerenciar leitura, subdivisão e escrita de imagens.
 
