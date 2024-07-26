@@ -10,7 +10,7 @@ from typing import Tuple, Optional
 from tensorflow.keras.applications import ResNet50
 from tensorflow.keras.layers import Input, Conv2D, UpSampling2D, Concatenate
 from tensorflow.keras.models import Model, load_model
-from tensorflow.keras.optimizers import SGD
+from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.metrics import BinaryIoU
 from tensorflow.keras.callbacks import TensorBoard
 
@@ -18,12 +18,11 @@ class SegmentationResnet50:
     """
     Classe para treinar o modelo DeepLabV3+ com ResNet50 para segmentação semântica de áreas vegetadas.
     """
-    def __init__(self, img_width: int = 256, img_height: int = 256, batch_size: int = 8, epochs: int = 100, learning_rate : float = 0.0001, validation_split: float = 0.1, test_split: float = 0, model_path: Optional[str] = None):
+    def __init__(self, img_width: int = 256, img_height: int = 256, batch_size: int = 8, epochs: int = 100, validation_split: float = 0.1, test_split: float = 0, model_path: Optional[str] = None):
         self.img_width = img_width
         self.img_height = img_height
         self.batch_size = batch_size
         self.epochs = epochs
-        self.learning_rate = learning_rate
         self.validation_split = validation_split
         self.test_split = test_split
         self.model = self.create_model(input_size=(self.img_height, self.img_width, 3))
@@ -86,7 +85,7 @@ class SegmentationResnet50:
         x = Conv2D(1, (1, 1), padding='same', activation='sigmoid')(x)
         
         model = Model(inputs=base_model.input, outputs=x)
-        model.compile(  SGD(learning_rate=self.learning_rate, weight_decay=0.0001, momentum=0.9, clipnorm=10.0),
+        model.compile(  Adam(),
                         loss='binary_crossentropy',
                         metrics=[BinaryIoU(threshold=0.5),'accuracy']
         )  
