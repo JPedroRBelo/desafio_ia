@@ -10,9 +10,6 @@ def ExG(image: Image.Image) -> Image.Image:
     """
     Calcula o índice Excess Green (ExG).
     O Excess Green Index (ExG) é calculado como `2 * green - red - blue`.
-    Contudo, foi implementado como `green - (red + blue) / 2.0` para que a cor verde se aproxime de 1.
-
-
     Args:
         image (Image.Image): Imagem RGB para binarização.
 
@@ -24,7 +21,6 @@ def ExG(image: Image.Image) -> Image.Image:
     # Separa canais RGB
     red, green, blue = img_array[:,:,0], img_array[:,:,1], img_array[:,:,2]
     # Excess Green Index
-    #index_exg =  green - (red + blue) / 2.0
     index_exg =  2*green - red - blue
     # Converte o array NumPy para uma imagem em escala de cinza
     return Image.fromarray(index_exg)
