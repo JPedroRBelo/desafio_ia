@@ -1,12 +1,10 @@
 # VARIÁVEIS DE CONFIGURAÇÂO
 
-
 #Tamanho dos subtiles utilizados em divide_orthomosaic
 SUBTILES_SIZE = (256,256)
 
 #Limiar para binarizar máscara de segmentação para ExG
 BINARIZE_THRESHOLD = 75
-
 
 #Limiar para binarização de inferências
 MASK_THRESHOLD = 0.9

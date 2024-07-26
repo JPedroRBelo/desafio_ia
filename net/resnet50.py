@@ -230,8 +230,5 @@ class SegmentationResnet50:
                 prediction = prediction[0, :current_tile_height, :current_tile_width, 0]
                 # Constroi a imagem de saída
                 result_mask[j:j + current_tile_height, i:i + current_tile_width] = prediction
-
-
-
         result_image = Image.fromarray(result_mask * 255)
         result_image.save(save_path)

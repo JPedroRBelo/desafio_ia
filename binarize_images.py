@@ -26,8 +26,16 @@ def ExG(image: Image.Image) -> Image.Image:
     return Image.fromarray(index_exg)
 
 def binarize(image: Image.Image) -> Image.Image:
+    """
+    Binariza uma imagem em escala de cinza com base em um limiar.
 
-    # Binarização
+    Args:
+        image (Image.Image): Imagem em escala de cinza a ser binarizada.
+
+    Returns:
+        Image.Image: Imagem binária resultante.
+    """
+
     image_array = np.array(image)
     #Considera somente valores não nulos (área transparente da imagem) e valores acima de um dado limiar
     binary_image_array = (image_array > 0) & (image_array < BINARIZE_THRESHOLD)
@@ -51,7 +59,6 @@ def process_images(input_dir: str, output_dir: str) -> None:
     """
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-
     #Encontra e lista todos os arquivos de imagem no diretório de entrada
     files = [f for f in os.listdir(input_dir) if os.path.isfile(os.path.join(input_dir, f))]
 
@@ -59,11 +66,9 @@ def process_images(input_dir: str, output_dir: str) -> None:
         for file in files:
             input_path = os.path.join(input_dir, file)
             output_path = os.path.join(output_dir,f'mask_{os.path.splitext(file)[0]}.png')
-
             try:
                 #Abre imagem
-                img = Image.open(input_path).convert('RGB')
-                
+                img = Image.open(input_path).convert('RGB')          
                 #Binariza e salva imagem
                 exg_image = ExG(img)
                 binary_img = binarize(exg_image)
@@ -77,7 +82,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Constrói dataset para segmentação de vegetação a partir da binarização de imagens.')
     parser.add_argument('--input', required=True, help='Diretório contendo imagens RGB.')
     parser.add_argument('--output', required=True, help='Diretório para salvar máscaras binarizadas.')
-
     args = parser.parse_args()
 
     # Configuração do logging

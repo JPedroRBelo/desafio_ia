@@ -1,11 +1,9 @@
-
 import argparse
 import logging
 import numpy as np
 
 from net.resnet50 import SegmentationResnet50
 from config.config import IMG_WIDTH, IMG_HEIGHT, BATCH_SIZE, EPOCHS, TEST_SPLIT, VAL_SPLIT, MASK_THRESHOLD
-
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Treinamento de modelo DeepLabV3+ com ResNet50 para segmentação de vegetação.')
