@@ -226,7 +226,6 @@ class SegmentationResnet50:
                 current_tile_width = min(self.img_width, img_width - i)
                 
                 current_tile_height = min(self.img_height, img_height - j)
-                print(current_tile_height)
                 prediction = prediction[0, :current_tile_height, :current_tile_width, 0]
                 # Constroi a imagem de saída
                 result_mask[j:j + current_tile_height, i:i + current_tile_width] = prediction
