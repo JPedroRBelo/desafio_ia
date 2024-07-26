@@ -2,7 +2,7 @@ import argparse
 import logging
 
 from net.resnet50 import SegmentationResnet50
-from config.config import IMG_WIDTH, IMG_HEIGHT
+from config.config import IMG_WIDTH, IMG_HEIGHT, MASK_THRESHOLD
 
     
 if __name__ == "__main__":
@@ -20,7 +20,7 @@ if __name__ == "__main__":
         img_height= IMG_HEIGHT,
         model_path=args.modelpath)
 
-    resnet50.predict(rgb_path=args.rgb, save_path= args.output)
+    resnet50.predict(rgb_path=args.rgb, save_path= args.output, inference_threshold=MASK_THRESHOLD)
     logging.info("Resultado com imagem segmentada salvo em: %s", args.output)
 
 

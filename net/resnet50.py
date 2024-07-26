@@ -158,13 +158,14 @@ class SegmentationResnet50:
         """
         self.model.save(model_path)
 
-    def train(self, dataset_dir: str, masks_dir: str) -> Model:
+    def train(self, dataset_dir: str, masks_dir: str, inference_threshold: float = 0.5) -> Model:
         """
         Treina o modelo DeepLabV3+ com ResNet50 usando as imagens e máscaras.
 
         Args:
             rgb_path (str): Diretório contendo as imagens RGB.
             groundtruth_path (str): Diretório contendo as máscaras de verdade-terreno.
+            inference_threshold (float): Valor limiar para binarizar máscara de segmentação, caso sejam realizadas inferências de teste.
         """
         # Carregar os dados
         images, masks = self.load_data(dataset_dir, masks_dir, (self.img_height, self.img_width))
@@ -189,20 +190,21 @@ class SegmentationResnet50:
             # Predições no conjunto de teste
             predictions = self.model.predict(test_images)
             # Arredonda as segmentações para garantir que sejam binárias
-            predictions = (predictions > 0.5).astype(np.uint8)
+            predictions = (predictions > inference_threshold).astype(np.uint8)
 
             # Plota os resultados
             self.plot_results(test_images, test_masks, predictions)
         return self.model
     
 
-    def predict(self, rgb_path: str, save_path: str) -> Model:
+    def predict(self, rgb_path: str, save_path: str, inference_threshold: float = 0.5) -> Model:
         """
         Segmenta imagem a partir de modelo.
 
         Args:
             rgb_path (str): Diretório contendo as imagens RGB.
             save_path (str): Caminho para salvar resultado.
+            inference_threshold (float): Valor limiar para binarizar máscara de segmentação a partir de inferência.
         """
         img = Image.open(rgb_path).convert('RGB')#.resize((img_size[1], img_size[0]))
         #img = np.array(img) / 255.0  # Normalizar para [0, 1]
@@ -219,7 +221,7 @@ class SegmentationResnet50:
                 tile = np.expand_dims(tile, axis=0)
                 prediction = self.model.predict(tile)
                 # Arredonda as segmentações para garantir que sejam binárias
-                prediction = (prediction > 0.5).astype(np.uint8)
+                prediction = (prediction > inference_threshold).astype(np.uint8)
                 # Remover a dimensão do batch e do canal
                 current_tile_width = min(self.img_width, img_width - i)
                 
