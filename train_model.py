@@ -4,7 +4,7 @@ import logging
 import numpy as np
 
 from net.resnet50 import SegmentationResnet50
-from config.config import IMG_WIDTH, IMG_HEIGHT, BATCH_SIZE, EPOCHS, TEST_SPLIT, VAL_SPLIT
+from config.config import IMG_WIDTH, IMG_HEIGHT, BATCH_SIZE, EPOCHS, TEST_SPLIT, VAL_SPLIT, LEARNING_RATE
 
     
 if __name__ == "__main__":
@@ -22,6 +22,7 @@ if __name__ == "__main__":
         img_height= IMG_HEIGHT,
         batch_size= BATCH_SIZE,
         epochs= EPOCHS,
+        learning_rate=LEARNING_RATE,
         validation_split= VAL_SPLIT,
         test_split= TEST_SPLIT
     )

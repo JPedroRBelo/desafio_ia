@@ -4,29 +4,32 @@ from PIL import Image
 import numpy as np
 import numpy as np
 import matplotlib.pyplot as plt
-from typing import Tuple, List, Optional
+from typing import Tuple, Optional
 
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+#os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 from tensorflow.keras.applications import ResNet50
 from tensorflow.keras.layers import Input, Conv2D, UpSampling2D, Concatenate
 from tensorflow.keras.models import Model, load_model
-from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.optimizers import SGD
 from tensorflow.keras.metrics import BinaryIoU
+from tensorflow.keras.callbacks import TensorBoard
 
 class SegmentationResnet50:
     """
     Classe para treinar o modelo DeepLabV3+ com ResNet50 para segmentação semântica de áreas vegetadas.
     """
-    def __init__(self, img_width: int = 256, img_height: int = 256, batch_size: int = 8, epochs: int = 100, validation_split: float = 0.1, test_split: float = 0, model_path: Optional[str] = None):
+    def __init__(self, img_width: int = 256, img_height: int = 256, batch_size: int = 8, epochs: int = 100, learning_rate : float = 0.0001, validation_split: float = 0.1, test_split: float = 0, model_path: Optional[str] = None):
         self.img_width = img_width
         self.img_height = img_height
         self.batch_size = batch_size
         self.epochs = epochs
+        self.learning_rate = learning_rate
         self.validation_split = validation_split
         self.test_split = test_split
         self.model = self.create_model(input_size=(self.img_height, self.img_width, 3))
+        self.logdir = 'logs'
         if model_path and os.path.exists(model_path):
-            self.model = load_model(model_path, custom_objects={'BinaryIoU': BinaryIoU(threshold=0.5)})
+            self.model = load_model(model_path)
         else:
             self.model = self.create_model(input_size=(self.img_height, self.img_width, 3))
 
@@ -83,7 +86,10 @@ class SegmentationResnet50:
         x = Conv2D(1, (1, 1), padding='same', activation='sigmoid')(x)
         
         model = Model(inputs=base_model.input, outputs=x)
-        model.compile(optimizer=Adam(), loss='binary_crossentropy', metrics=[BinaryIoU(threshold=0.5),'accuracy'])    
+        model.compile(  SGD(learning_rate=self.learning_rate, weight_decay=0.0001, momentum=0.9, clipnorm=10.0),
+                        loss='binary_crossentropy',
+                        metrics=[BinaryIoU(threshold=0.5),'accuracy']
+        )  
         return model
     
     def load_data(self, img_dir: str, mask_dir: str, img_size: Tuple[int, int]) -> Tuple[np.ndarray, np.ndarray]:
@@ -169,8 +175,16 @@ class SegmentationResnet50:
         train_images, test_images = images[:split_idx], images[split_idx:]
         train_masks, test_masks = masks[:split_idx], masks[split_idx:]
 
-        # Treinar o modelo
-        self.model.fit(train_images, train_masks, batch_size=self.batch_size, epochs=self.epochs, validation_split=self.validation_split)
+        #Configuração do tensorboard
+        tensorboard_callback = TensorBoard(log_dir=self.logdir, histogram_freq=1)
+        # Treinamento do modelo
+        self.model.fit(train_images,
+                       train_masks,
+                       batch_size=self.batch_size,
+                       epochs=self.epochs,
+                       validation_split=self.validation_split,
+                       callbacks=[tensorboard_callback]
+        )
 
         if len(test_images) > 0:
             # Predições no conjunto de teste
@@ -182,7 +196,7 @@ class SegmentationResnet50:
             self.plot_results(test_images, test_masks, predictions)
         return self.model
     
-    """
+
     def predict(self, rgb_path: str, save_path: str) -> Model:
         """
         Segmenta imagem a partir de modelo.
@@ -192,14 +206,31 @@ class SegmentationResnet50:
             save_path (str): Caminho para salvar resultado.
         """
         img = Image.open(rgb_path).convert('RGB')#.resize((img_size[1], img_size[0]))
-        img = np.array(img) / 255.0  # Normalizar para [0, 1]
+        #img = np.array(img) / 255.0  # Normalizar para [0, 1]
+
+        img_width, img_height = img.size
+        result_mask = np.zeros((img_height, img_width), dtype=np.uint8)
+        
+        for i in range(0, img_width, self.img_width):
+            for j in range(0, img_height, self.img_height):
+                #Calcula box a ser recortado da imagem de origem
+                box = (i, j, i + self.img_width, j + self.img_height)
+                tile = img.crop(box)
+                tile = np.array(tile) / 255.0  # Normalizar para [0, 1]
+                tile = np.expand_dims(tile, axis=0)
+                prediction = self.model.predict(tile)
+                # Arredonda as segmentações para garantir que sejam binárias
+                prediction = (prediction > 0.5).astype(np.uint8)
+                # Remover a dimensão do batch e do canal
+                current_tile_width = min(self.img_width, img_width - i)
+                
+                current_tile_height = min(self.img_height, img_height - j)
+                print(current_tile_height)
+                prediction = prediction[0, :current_tile_height, :current_tile_width, 0]
+                # Constroi a imagem de saída
+                result_mask[j:j + current_tile_height, i:i + current_tile_width] = prediction
 
 
-        # Predições no conjunto de teste
-        predictions = self.model.predict(test_images)
-        # Arredonda as segmentações para garantir que sejam binárias
-        predictions = (predictions > 0.5).astype(np.uint8)
 
-
-        return self.model
-    """
+        result_image = Image.fromarray(result_mask * 255)
+        result_image.save(save_path)
