@@ -27,19 +27,19 @@ def ExG(image: Image.Image) -> Image.Image:
 
 def binarize(image: Image.Image) -> Image.Image:
     """
-    Binariza uma imagem em escala de cinza com base em um limiar.
+    Binariza uma imagem com base em um limiar.
 
     Args:
-        image (Image.Image): Imagem em escala de cinza a ser binarizada.
+        image (Image.Image): Imagem a ser binarizada.
 
     Returns:
         Image.Image: Imagem binária resultante.
     """
 
     image_array = np.array(image)
-    #Considera somente valores não nulos (área transparente da imagem) e valores acima de um dado limiar
+    # Considera somente valores não nulos (área transparente da imagem) e valores acima de um dado limiar
     binary_image_array = (image_array > 0) & (image_array < BINARIZE_THRESHOLD)
-    #Converte máscara binária para pixels numerados
+    # Converte máscara binária para pixels numerados
     binary_image_array = binary_image_array.astype(np.uint8) * BINARY_MAX
     # Reconverte para imagem
     binary_image = Image.fromarray(binary_image_array, mode='L')
@@ -59,7 +59,7 @@ def process_images(input_dir: str, output_dir: str) -> None:
     """
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    #Encontra e lista todos os arquivos de imagem no diretório de entrada
+    # Encontra e lista todos os arquivos de imagem no diretório de entrada
     files = [f for f in os.listdir(input_dir) if os.path.isfile(os.path.join(input_dir, f))]
 
     with tqdm(total=len(files), desc="Processando imagens") as pbar:
