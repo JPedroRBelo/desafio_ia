@@ -1,6 +1,6 @@
-#  Desafio IA: Segmentação de Vegetação
+# Segmentação de Vegetação com DeepLabV3+
 
-Este repositório é referente a um desafio para detecção (segmentação) de vegetação.
+Este projeto realiza a detecção (segmentação) de vegetação em imagens.
 Ele é etruturado em 4 etapas:
 
 1. Quebra de Imagem em Blocos;
